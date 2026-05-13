@@ -10,8 +10,12 @@
 <body>
   <!-- 部分テンプレート -->
   <div class="wrapper">
+    <div class="side-bar">
     <div th:insert="~{side_bar :: side_bar}"></div>
+  </div>
+  <div class="main_chat">
     <div th:insert="~{main_chat :: main_chat}"></div>
+  </div>
   </div>
 </body>
 </html>
