@@ -28,6 +28,11 @@ public class CustomUserDetail implements UserDetails {
     return user.getEmail();//ユーザーネームでログインするところを、メールでログインできるように変更
   }
 
+  //そもそも元のデータにないので新たに作成
+  public Integer getId(){
+    return user.getId();
+  }
+
   @Override
   public String getPassword(){
   return user.getPassword();
