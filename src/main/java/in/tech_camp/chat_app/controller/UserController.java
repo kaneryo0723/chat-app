@@ -1,7 +1,13 @@
 package in.tech_camp.chat_app.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +20,10 @@ import in.tech_camp.chat_app.form.UserEditForm;
 import in.tech_camp.chat_app.form.UserForm;
 import in.tech_camp.chat_app.repository.UserRepository;
 import in.tech_camp.chat_app.service.UserService;
+import in.tech_camp.chat_app.validation.ValidationOrder;//全然別のvalidationOrderをインポートしていた
 import lombok.AllArgsConstructor;
+
+
 
 @AllArgsConstructor
 @Controller
@@ -34,7 +43,24 @@ public class UserController {
 
   //サインアップ以降の処理
   @PostMapping("/user")//SecurityConfig.javaに記載されている通りのルーティング。
-  public String createUser(@ModelAttribute("userForm") UserForm userForm,Model model) {
+  public String createUser(@ModelAttribute("userForm") @Validated(ValidationOrder.class) UserForm userForm,BindingResult result,Model model) {
+    //バリデーションチェックを追記
+    userForm.validatePasswordConfirmation(result);
+    //メールアドレスが既に存在したらエラーを出す
+    if(userRepository.existsByEmail(userForm.getEmail())){
+      result.rejectValue("email", "null","Email already exists");
+    }
+
+    if(result.hasErrors()){
+      List<String> errorMessages=result.getAllErrors().stream()
+                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                  .collect(Collectors.toList());//エラーを格納する処理
+
+      model.addAttribute("errorMessages",errorMessages);
+      return "users/signUp";
+    }
+    
+
     //サインアップ画面で入力した諸々をエンティティファイルに格納する処理
       UserEntity userEntity=new UserEntity();
       userEntity.setName(userForm.getName());
@@ -83,7 +109,22 @@ public class UserController {
         return "users/edit";
     }
      @PostMapping("/users/{userId}")
-    public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") UserEditForm userEditForm, Model model){
+    public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") @Validated(ValidationOrder.class) UserEditForm userEditForm, BindingResult result, Model model){
+      //ユーザー作成メソッドに引き続き、編集メソッドでもバリデーションチェックを実装
+      String newEmail = userEditForm.getEmail();
+    if (userRepository.existsByEmailExcludingCurrent(newEmail, userId)) {
+      result.rejectValue("email", "error.user", "Email already exists");
+    }
+    if (result.hasErrors()) {
+      List<String> errorMessages = result.getAllErrors().stream()
+                                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                    .collect(Collectors.toList());
+      model.addAttribute("errorMessages", errorMessages);
+      model.addAttribute("user", userEditForm);
+      return "users/edit";
+    }
+      
+    //上書き処理
       UserEntity user=userRepository.findById(userId);
         user.setName(userEditForm.getName());//編集したものを既存のデータに上書きするからuserが先に来る。
         user.setEmail(userEditForm.getEmail());
@@ -98,4 +139,5 @@ public class UserController {
    //画面変更はしないのでaddAttributeは記載しない。
     return "redirect:/";//signUp.htmlを返す
   }
+
 }

@@ -31,7 +31,14 @@ public interface UserRepository {
   @Update("UPDATE users SET name = #{name}, email = #{email} WHERE id = #{id}")
   void update(UserEntity user);
 
+  //存在するかチェックするのでexists。返り値はtrue or falseなのでboolean
+ @Select("SELECT EXISTS(SELECT 1 FROM users WHERE email = #{email})")//1に意味は特にない。
+  boolean existsByEmail(String email);
 
-
+  //ユーザー情報の更新時に、他の誰かとメアドが重複していないかをチェック
+  //>0とすることで、1以上あったらtrueを返す。
+  //メールが既にあり、かつidが違う(他の誰かが既存のメアドを使った)時に実行される
+  @Select("SELECT COUNT(*) > 0 FROM users WHERE email = #{email} AND id != #{userId}")
+  boolean existsByEmailExcludingCurrent(String email, Integer userId);
 
 }
