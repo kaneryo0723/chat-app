@@ -4,6 +4,7 @@
 <div th:fragment="side_bar">
   <div class="side-bar-header">
     <div class="header-name">
+      <a th:href="@{/users/{userId}/edit(userId=${user.id})}" th:text="${user.name}">ユーザー名</a>
       <a href="http://">Tom</a>
     </div>
     <div class="create-room">
