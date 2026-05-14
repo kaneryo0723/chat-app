@@ -4,11 +4,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import in.tech_camp.chat_app.entity.UserEntity;
 import in.tech_camp.chat_app.form.LoginForm;
+import in.tech_camp.chat_app.form.UserEditForm;
 import in.tech_camp.chat_app.form.UserForm;
 import in.tech_camp.chat_app.repository.UserRepository;
 import in.tech_camp.chat_app.service.UserService;
@@ -67,5 +69,33 @@ public class UserController {
         }
         return "users/login";
     }
-    
+    @GetMapping("/users/{userId}/edit")
+    public String editUserForm(@PathVariable("userId")Integer userId, Model model) {
+        UserEntity user=userRepository.findById(userId);//userIdを探さないと始まらない。
+        UserEditForm userForm=new UserEditForm();//編集用のインスタンス
+        //編集画面に遷移したとき、名前とメアドが入力されている状態にする。
+        //edit.htmlに変数とか諸々書いてあって、そこに入れるイメージ。
+        userForm.setId(user.getId());
+        userForm.setName(user.getName());
+        userForm.setEmail(user.getEmail());
+        
+        model.addAttribute("user",userForm);
+        return "users/edit";
+    }
+     @PostMapping("/users/{userId}")
+    public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") UserEditForm userEditForm, Model model){
+      UserEntity user=userRepository.findById(userId);
+        user.setName(userEditForm.getName());//編集したものを既存のデータに上書きするからuserが先に来る。
+        user.setEmail(userEditForm.getEmail());
+        //データベースを書き換える処理なので、try-catchを書く。
+        try {
+          userRepository.update(user);
+      } catch (Exception e) {
+        System.out.println("エラー：" + e);
+        model.addAttribute("user",userEditForm);//要確認：多分リセット？引数でもらったuserFormを入れてる。
+        return "users/edit";
+      }
+   //画面変更はしないのでaddAttributeは記載しない。
+    return "redirect:/";//signUp.htmlを返す
+  }
 }
