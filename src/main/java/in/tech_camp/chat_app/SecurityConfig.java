@@ -20,10 +20,13 @@ public class SecurityConfig {
       .csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(authorizeRequests -> authorizeRequests
         //以下でログアウト状態でも実行できるGETリクエストを記述する
+        //permitAll()で、「全員ここなら入っていいよ」と言っている。cssは、「どんな人でもcssつけるよ～」
         .requestMatchers("/css/**", "/users/sign_up", "/users/login").permitAll()
         //以下でログアウト状態でも実行できるPOSTリクエストを記述する
         .requestMatchers(HttpMethod.POST, "/user").permitAll()
-        //上記以外のリクエストは認証されたユーザーのみ許可される(要ログイン)
+        //上記以外のリクエストは認証されたユーザーのみ許可される(要ログイン)←login.htmlを完成させないと
+        //「繰り返しリダイレクトが行われました」と表示される。(キャッシュの問題ではない。)
+        
         .anyRequest().authenticated())
 
       .formLogin(login -> login
