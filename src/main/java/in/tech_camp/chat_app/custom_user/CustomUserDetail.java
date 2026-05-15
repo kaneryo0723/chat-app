@@ -10,6 +10,7 @@ import in.tech_camp.chat_app.entity.UserEntity;
 import lombok.Data;
 
 @Data
+//ログイン関係のファイル
 //springSecurityのチュートリアルに、UserDetailsに関する仕様が載っている。
 public class CustomUserDetail implements UserDetails {
   private final UserEntity user;

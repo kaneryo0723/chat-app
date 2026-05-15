@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ChatApp</title>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <link rel="stylesheet" th:href="@{/css/room.css}" />
+</head>
+<body>
+
+  <div class='chat-room-form'>
+    <h1>新規チャットルーム</h1>
+    <form th:action="@{/rooms}" th:method="post" th:object="${roomForm}">
+      <div th:if="${errorMessages}" th:each="error : ${errorMessages}">
+        <div th:text="${error}"></div>
+      </div>
+      <div class='chat-room-form__field'>
+        <div class='chat-room-form__field--left'>
+          <label class="chat-room-form__label" for="room_name">チャットルーム名</label>
+        </div>
+        <div class='chat-room-form__field--right'>
+          <input type="text" th:field="*{name}" id="room_name" class="chat__room_name chat-room-form__input" placeholder="チャットルーム名を入力してください">
+        </div>
+      </div>
+      <div class='chat-room-form__field'>
+      </div>
+      <div class='chat-room-form__field'>
+        <div class='chat-room-form__field--left'>
+          <label class='chat-room-form__label' for='chat_room_チャットメンバー'>チャットメンバー</label>
+        </div>
+        <div class='chat-room-form__field--right'>
+          <select th:field="*{memberIds}">
+            <!-- value=""は、未選択の状態を明示するため。(ユーザーのvalueと混同しないように) -->
+          <option value="">チャットするユーザーを選択してください</option>
+          <!-- th:valueを付与することで、選択したユーザーのidを送るようにしている。 -->
+           <option th:each="user : ${users}"
+                   th:value="${user.id}"
+                    th:text="${user.name}">
+            </option>
+          </select>
+          <!-- th:name="memberIds"とすることで、select・option要素で送信する情報に本input要素も追加で送信することができる -->
+          <!-- 送信する値は「ログインユーザーの」idであるため、ログインユーザーは自動的にルームメンバーの一員となれる -->
+           <!-- 下記コードのみ変更した(th:ifを使用し、ログインが正常な時だけidを参照する) -->
+            <!-- #authentication != null:そもそも認証オブジェクト自体が存在するかを確認します。
+             #authentication.principal != 'anonymousUser':ログインしていない状態（匿名ユーザー）を排除します。 -->
+             <!-- ${}は変数を渡している。authenticationはSpringSecurityのもの。thymeleafの機能で変数式を定義している -->
+          <input type="hidden" 
+       th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}"
+       th:value="${#authentication.principal.id}" 
+       th:name="memberIds" />
+        </div>
+        </div>
+      </div>
+      <div class='chat-room-form__field'>
+        <div class='chat-room-form__field--left'></div>
+        <div class='chat-room-form__field--right'>
+          <input type="submit" value="Create Room" class="chat-room-form__action-btn" data-disable-with="Create Room">
+        </div>
+      </div>
+    </form>
+  </div>
+
+</body>
+</html>

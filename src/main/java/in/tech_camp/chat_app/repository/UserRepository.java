@@ -1,5 +1,7 @@
 package in.tech_camp.chat_app.repository;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -17,6 +19,7 @@ public interface UserRepository {
   @Options(useGeneratedKeys=true,keyProperty="id") 
   void insert(UserEntity user);
 
+  //UserEntity型は、データが一つしか取得されないときに使う。複数取得するときはList<UserEntity>とする。
   //emailをすべて選択する処理
   //UserAuthenticationService.javaを見るとわかりやすいかも
   //UserEntity型のデータを返す。というかselectって選択したデータを返すから返り値のないvoidは使えない。
@@ -40,5 +43,11 @@ public interface UserRepository {
   //メールが既にあり、かつidが違う(他の誰かが既存のメアドを使った)時に実行される
   @Select("SELECT COUNT(*) > 0 FROM users WHERE email = #{email} AND id != #{userId}")
   boolean existsByEmailExcludingCurrent(String email, Integer userId);
+
+  //<>←!=と同じ意味。(Integer excludedId)で渡された値が#{excludedId}に埋め込まれる。
+  //excluded:除外された。ログイン中のユーザーのidを除外してそれ以外のidをプルダウンに表示させる。
+  //データを複数取得するためListを使用している。
+  @Select("SELECT * FROM users WHERE id <> #{excludedId}")
+  List<UserEntity> findAllExcept(Integer excludedId);
 
 }
