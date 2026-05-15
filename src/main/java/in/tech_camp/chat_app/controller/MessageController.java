@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 public class MessageController {
   private final UserRepository userRepository;
   private final RoomUserRepository roomUserRepository;
-  @GetMapping("/")//ホーム画面になったとき、以下の処理を実行する
+    @GetMapping("/message")//メッセージ詳細画面になったとき、以下の処理を実行する
   //@AuthenticationPrincipalで、現在のログイン中のユーザーを取得。
   public String showMessages(@AuthenticationPrincipal CustomUserDetail currentUser,Model model){
     //ログインユーザーの情報を取得しただけで、編集画面に飛ぶプログラムは書いていない。
