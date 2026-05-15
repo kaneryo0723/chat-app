@@ -12,4 +12,5 @@ public class RoomEntity {
   //RoomEntityの情報にアクセスできるようにフィールドを追加
   //1つのRoomEntityからは、複数のRoomUserEntityが紐づく。(1つのルームは（中間テーブルのデータを）複数持つことができる（＝そのルームには複数のユーザーが紐づくから）)
   private List<RoomUserEntity> roomUsers;
+  private List<MessageEntity> messages;
 }
