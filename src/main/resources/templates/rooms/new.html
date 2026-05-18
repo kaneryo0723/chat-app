@@ -47,7 +47,7 @@
              <!-- ${}は変数を渡している。authenticationはSpringSecurityのもの。thymeleafの機能で変数式を定義している -->
           <input type="hidden" 
        th:if="${#authentication != null and #authentication.principal != 'anonymousUser'}"
-       th:value="${#authentication.principal.id}" 
+       th:value="${#authentication?.principal.id}" 
        th:name="memberIds" />
         </div>
         </div>
