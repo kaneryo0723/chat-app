@@ -49,7 +49,14 @@ public class MessageController {
     model.addAttribute("messageForm",new MessageForm());
 
     //roomIdをPathVariableで受け取って、ビューファイルに渡す。
-     model.addAttribute("roomId", roomId);
+    RoomEntity room=roomRepository.findById(roomId);
+     model.addAttribute("room", room);
+
+    //ルーム内のチャットをすべて取得
+     List<MessageEntity> messages=messageRepository.findByRoomId(roomId);
+
+     //ビューファイルに渡す
+     model.addAttribute("messages",messages);
     return "messages/index";//messagesディレクトリにあるindex.htmlを返す(表示する)
   }
   //フォームからのリクエストをうけとりmessageテーブルに保存するメソッド
