@@ -1,5 +1,11 @@
 package in.tech_camp.chat_app.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -7,12 +13,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.multipart.MultipartFile;
 
+import in.tech_camp.chat_app.ImageUrl;
 import in.tech_camp.chat_app.custom_user.CustomUserDetail;
 import in.tech_camp.chat_app.entity.MessageEntity;
 import in.tech_camp.chat_app.entity.RoomEntity;
@@ -23,7 +30,6 @@ import in.tech_camp.chat_app.repository.MessageRepository;
 import in.tech_camp.chat_app.repository.RoomRepository;
 import in.tech_camp.chat_app.repository.RoomUserRepository;
 import in.tech_camp.chat_app.repository.UserRepository;
-import in.tech_camp.chat_app.validation.ValidationOrder;
 import lombok.AllArgsConstructor;
 
 
@@ -34,6 +40,7 @@ public class MessageController {
   private final RoomRepository roomRepository;
   private final RoomUserRepository roomUserRepository;
   private final MessageRepository messageRepository;
+  private final ImageUrl imageUrl;
     @GetMapping("/rooms/{roomId}/messages")//フォームから送信され、コントローラーが受け取るためGet
   public String showMessages(@PathVariable("roomId") Integer roomId,@AuthenticationPrincipal CustomUserDetail currentUser,Model model){
     //ログインユーザーの情報を取得しただけで、編集画面に飛ぶプログラムは書いていない。
@@ -64,12 +71,29 @@ public class MessageController {
   }
   //フォームからのリクエストをうけとりmessageテーブルに保存するメソッド
   @PostMapping("/rooms/{roomId}/messages")//フォームから送信され、messageテーブルに保存するためpost
-  public String saveMassage(@PathVariable("roomId") Integer roomId,@ModelAttribute("messageForm")@Validated(ValidationOrder.class) MessageForm messageForm,BindingResult bindingResult,@AuthenticationPrincipal CustomUserDetail currentUser){
+  public String saveMassage(@PathVariable("roomId") Integer roomId,@ModelAttribute("messageForm") MessageForm messageForm,BindingResult bindingResult,@AuthenticationPrincipal CustomUserDetail currentUser){
+    messageForm.validateMessage(bindingResult);
     if(bindingResult.hasErrors())
 {
 return "redirect:/rooms/"+roomId+"/messages";
 }    MessageEntity message=new MessageEntity();//自身のメソッドを使うため、一度newしてあげないといけない。
     message.setContent(messageForm.getContent());//フォームに入力された文章をmessageエンティティに保存
+
+    MultipartFile imageFile=messageForm.getImage();//画像を格納する変数の定義
+    if(imageFile!=null&&!imageFile.isEmpty()){
+      try {
+          String uploadDir=imageUrl.getImageUrl();
+          String fileName=LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))+"_"+imageFile.getOriginalFilename();
+          Path imagePath=Paths.get(uploadDir,fileName);
+          Files.copy(imageFile.getInputStream(),imagePath);
+          message.setImage("/uploads/"+fileName);
+      } catch (IOException e) {
+        System.out.println("エラー："+e);
+        return "redirect:/rooms/"+roomId+"/messages";
+        
+      }
+    }
+    
 
     UserEntity user=userRepository.findById(currentUser.getId());//ログインしているユーザーのid
     RoomEntity room=roomRepository.findById(roomId);//チャットルームのid

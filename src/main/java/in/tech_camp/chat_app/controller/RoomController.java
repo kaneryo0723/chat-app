@@ -62,6 +62,8 @@ return "rooms/index";
      List<UserEntity> users=userRepository.findAllExcept(currentUser.getId());
     model.addAttribute("users",users);//キーはthymeleafで使う。
     model.addAttribute("roomForm",new RoomForm());
+    //geminiによって追加したコード
+    model.addAttribute("loginUserId", currentUser.getId());
       return "rooms/new";
   }
 

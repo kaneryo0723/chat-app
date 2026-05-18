@@ -19,7 +19,7 @@ public interface RoomUserRepository {
 
   // room_users を探したついでに、書いてある room_id を使って rooms テーブルから詳細データも自動で取ってきて、一つの塊にしておいて
   //roomsテーブルを参照していないのにroomsテーブルを参照しに行けるのは、findByIdメソッドにつけているselectアノテーションのおかげ
-  @Select("SELECT * FROM room_users WHERE user_id=#{user_id}")
+  @Select("SELECT * FROM room_users WHERE user_id=#{userId}")
   @Result(property="room",column="room_id",
           one=@One(select="in.tech_camp.chat_app.repository.RoomRepository.findById"))
           List<RoomUserEntity> findByUserId(Integer userId);
