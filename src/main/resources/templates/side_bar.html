@@ -17,7 +17,7 @@
   <div class="rooms">
     <div th:each="room : ${rooms}" class="room">
       <div class="room-name">
-        <!-- thの付け忘れに注意 -->
+        <!-- thの付け忘れに注意。ログインユーザーのみがチャットルームを見れるので、表示されないルームもある？ -->
         <a th:href="@{/rooms/{roomId}/messages(roomId=${room.id})}" th:text="${room.name}">techroom</a>
       </div>
     </div>
