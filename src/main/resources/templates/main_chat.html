@@ -16,7 +16,7 @@
     <div th:each="message : ${messages}" class="message">
       <div class="upper-message">
         <div class="message-user"th:text="${message.user.name}">ユーザー名</div>
-        <div class="message-date"th:text="${message.createdAt}">日付</div>
+        <div class="message-date"th:text="${#dates.format(message.createdAt, 'yyyy/MM/dd HH:mm:ss')}">日付</div>
       </div>
       <div class="lower-message">
         <!-- ○○.○○ の○○はattributeName(model.addAttributeを受け取っている)。基本エンティティとかだから、エンティティ.変数みたいになっている-->
