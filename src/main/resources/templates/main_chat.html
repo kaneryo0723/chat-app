@@ -24,6 +24,9 @@
         <!-- ○○.○○ の○○はattributeName(model.addAttributeを受け取っている)。基本エンティティとかだから、エンティティ.変数みたいになっている-->
         <div class="message-content" th:text="${message.content}">メッセージ内容</div>
         </div>
+        <div th:if="${message.image}">
+          <img th:src="@{${message.image}}" alt="メッセージ画像" style="width:500px; height: 500px;"/>
+        </div>
       </div>
     </div>
   <!-- メッセージ投稿機能を実装 -->
